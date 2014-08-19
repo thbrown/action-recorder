@@ -12,6 +12,7 @@ import java.awt.event.KeyListener;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -24,6 +25,7 @@ public class Main extends JFrame implements ActionListener, KeyListener {
 
 	// UI objects
 	JPanel mainPanel;
+	JLabel escapeInstructions;
 	JButton startRecording;
 	JButton stopRecording;
 	JButton replay;
@@ -36,6 +38,9 @@ public class Main extends JFrame implements ActionListener, KeyListener {
 	
 	// Create a new Record object to store recorded data
 	Record newRecord = null;
+	
+	// Keep a handle on the thread used to playback data
+	Playback pb;
 	
 	public static void main(String[] args) {
 		Main m = new Main("ActionRecorder");
@@ -51,12 +56,14 @@ public class Main extends JFrame implements ActionListener, KeyListener {
 		mainPanel = new JPanel();
 		this.addContent(mainPanel);
 		this.add(mainPanel, BorderLayout.CENTER);
+		this.setFocusable(true);
 		this.addKeyListener(this);
 	}
 
 	// Add UI elements to the JFrame
 	public void addContent(JPanel p) {
 		JPanel buttonPanel = new JPanel();
+		buttonPanel.addKeyListener(this);
 		startRecording = new JButton("Record");
 		startRecording.putClientProperty("id",ButtonAction.START_RECORDING);
 		startRecording.addActionListener(this);
@@ -76,6 +83,7 @@ public class Main extends JFrame implements ActionListener, KeyListener {
 		p.add(buttonPanel, BorderLayout.NORTH);
 
 		JTextArea statusConsole = new JTextArea();
+		//statusConsole.setEditable(false);
 		this.statusConsole = statusConsole;
 		statusConsole.append("Welcome to Action Recorder! \n");
 		statusConsole.append("Select 'Record' to begin recording mouse and keyboard commands \n");
@@ -96,7 +104,7 @@ public class Main extends JFrame implements ActionListener, KeyListener {
 			startRecording.setEnabled(false);
 			replay.setEnabled(false);
 
-			// Create a new Recode abject (To store user acrions)
+			// Create a new Record object (To store user actions)
 			newRecord = new Record();
 
 			// Init jnativehook
@@ -145,22 +153,8 @@ public class Main extends JFrame implements ActionListener, KeyListener {
 
 		} else if(eventId == ButtonAction.REPLAY) {
 			
-			Robot executingRobot;
-			
-			// Execute each command using java robot
-			try {
-				executingRobot = new Robot();
-			} catch (AWTException e) {
-				e.printStackTrace();
-				statusConsole.append("Unable to start java robot\n");
-				return;
-			}
-			
-			// Call execute on each command in the list
-			for(Command c : newRecord.getCommandList()) {
-				c.execute(executingRobot);
-				statusConsole.append(c.toString() + "\n");
-			}
+			this.pb = new Playback(newRecord, statusConsole);
+			pb.start();
 
 		} else {
 			statusConsole.append("Command Not Recognized\n");
@@ -178,17 +172,30 @@ public class Main extends JFrame implements ActionListener, KeyListener {
 		int keyCode = event.getKeyCode();
 		ButtonAction action = null;
 		
-		// Logic for future hotkeys
+		System.out.println("Anything!");
+		
+		// Logic for hotkeys
 		switch( keyCode ) { 
-		case KeyEvent.VK_UP:
-			action = ButtonAction.START_RECORDING;
-			break;
-		case KeyEvent.VK_DOWN:
-			action = ButtonAction.STOP_RECORDING;
-			break;
-		case KeyEvent.VK_R:
-			action = ButtonAction.REPLAY;
-			break;
+			/*
+			case KeyEvent.VK_UP:
+				action = ButtonAction.START_RECORDING;
+				break;
+			case KeyEvent.VK_DOWN:
+				action = ButtonAction.STOP_RECORDING;
+				break;
+			case KeyEvent.VK_R:
+				action = ButtonAction.REPLAY;
+				break;
+			
+			case KeyEvent.VK_R:
+				System.out.println("hshshs");
+			case KeyEvent.VK_ESCAPE:
+				if(pb != null) {
+					System.out.println("Requesting stop");
+					pb.requestThreadStop();
+				}
+				break;
+			*/
 		}
 		
 		processButtonPress(action);

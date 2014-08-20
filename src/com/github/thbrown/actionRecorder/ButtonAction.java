@@ -1,4 +1,4 @@
-package com.github.thbrown.actionRecorder;
+package com.github.thbrown.actionrecorder;
 
 public enum ButtonAction {
 	START_RECORDING,

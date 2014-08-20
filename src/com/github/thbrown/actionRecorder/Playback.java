@@ -1,17 +1,24 @@
-package com.github.thbrown.actionRecorder;
+package com.github.thbrown.actionrecorder;
 
 import java.awt.AWTException;
 import java.awt.Robot;
 
-import javax.swing.JTextArea;
-
+/**
+ * This class contains the variables and methods necessary to execute the mouse movements and button presses
+ * saved during a recording session.
+ * 
+ * @author thbrown
+ */
 public class Playback extends Thread {
 	
+	// Flag variable so the Thread can be halted from the main thread
 	private volatile boolean run;
-	private JTextArea statusConsole;
-	private Record newRecord;
 	
-	Playback(Record newRecord, JTextArea statusConsole) {
+	// The text area on the UI, used to show status updates
+	private StatusArea statusConsole;
+	private RecordData newRecord;
+	
+	Playback(RecordData newRecord, StatusArea statusConsole) {
 		run = true;
 		this.statusConsole = statusConsole;
 		this.newRecord = newRecord;
@@ -22,15 +29,15 @@ public class Playback extends Thread {
 	}
 	
 	public void run() {
-		// Launch the robot in a new thread so we an 
+		// Launch the robot in a new thread so the buttons on the UI are still pressable
 		Robot executingRobot;
 		
-		// Execute each command using java robot
+		// Execute each command using a java robot
 		try {
 			executingRobot = new Robot();
 		} catch (AWTException e) {
 			e.printStackTrace();
-			statusConsole.append("Unable to start java robot\n");
+			statusConsole.append("Error: Unable to start java robot\n");
 			return;
 		}
 		

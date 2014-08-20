@@ -1,4 +1,4 @@
-package com.github.thbrown.actionRecorder;
+package com.github.thbrown.actionrecorder;
 
 public enum CommandType {
 	MOUSE_MOVE,

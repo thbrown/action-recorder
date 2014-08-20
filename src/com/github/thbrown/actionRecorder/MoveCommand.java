@@ -1,6 +1,5 @@
-package com.github.thbrown.actionRecorder;
+package com.github.thbrown.actionrecorder;
 import java.awt.Robot;
-
 
 public class MoveCommand {
 

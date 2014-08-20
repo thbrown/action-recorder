@@ -1,9 +1,7 @@
-package com.github.thbrown.actionRecorder;
+package com.github.thbrown.actionrecorder;
 
-import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Robot;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -15,32 +13,37 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 
+/**
+ * This is the main class for the ActionRecorder application.
+ * 
+ * This applications records mouse and keyboard presses and mouse movement. The recordings can then be played back.
+ * @author thbrown
+ */
 public class Main extends JFrame implements ActionListener, KeyListener {
 
 	// UI objects
-	JPanel mainPanel;
-	JLabel escapeInstructions;
-	JButton startRecording;
-	JButton stopRecording;
-	JButton replay;
-	JTextArea statusConsole;
+	private JPanel mainPanel;
+	private JLabel escapeInstructions;
+	private JButton startRecording;
+	private JButton stopRecording;
+	private JButton replay;
+	private StatusArea statusConsole;
 
 	// JNativeHook library objects
-	GlobalKeyboardListener keyboardListener;
-	GlobalMouseListener mouseListener;
-	GlobalMouseWheelListener mouseWheelListener;
+	private GlobalKeyboardListener keyboardListener;
+	private GlobalMouseListener mouseListener;
+	private GlobalMouseWheelListener mouseWheelListener;
 	
 	// Create a new Record object to store recorded data
-	Record newRecord = null;
+	private RecordData data = null;
 	
-	// Keep a handle on the thread used to playback data
-	Playback pb;
+	// Keep a handle on the thread used to play back data
+	private Playback playbackThread;
 	
 	public static void main(String[] args) {
 		Main m = new Main("ActionRecorder");
@@ -60,7 +63,11 @@ public class Main extends JFrame implements ActionListener, KeyListener {
 		this.addKeyListener(this);
 	}
 
-	// Add UI elements to the JFrame
+	/**
+	 * Adds UI elements (Record, Stop, and Replay buttons plus the status JTextArea) to the specified panel.
+	 * 
+	 * @param p	the panel to add the UI elements to
+	 */
 	public void addContent(JPanel p) {
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.addKeyListener(this);
@@ -82,12 +89,7 @@ public class Main extends JFrame implements ActionListener, KeyListener {
 		buttonPanel.add(replay);
 		p.add(buttonPanel, BorderLayout.NORTH);
 
-		JTextArea statusConsole = new JTextArea();
-		//statusConsole.setEditable(false);
-		this.statusConsole = statusConsole;
-		statusConsole.append("Welcome to Action Recorder! \n");
-		statusConsole.append("Select 'Record' to begin recording mouse and keyboard commands \n");
-		statusConsole.append("------------------------------------------------- \n");	
+		statusConsole = new StatusArea();	
 
 		JScrollPane scrollPane = new JScrollPane(statusConsole);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -95,7 +97,11 @@ public class Main extends JFrame implements ActionListener, KeyListener {
 	}
 
 
-	// UI Button logic
+	/**
+	 * Executes code for the specified button press.
+	 * 
+	 * @param eventId	the type of button that was pressed
+	 */
 	public void processButtonPress(ButtonAction eventId) {
 		
 		if(eventId == ButtonAction.START_RECORDING) {
@@ -104,8 +110,8 @@ public class Main extends JFrame implements ActionListener, KeyListener {
 			startRecording.setEnabled(false);
 			replay.setEnabled(false);
 
-			// Create a new Record object (To store user actions)
-			newRecord = new Record();
+			// Create a new RecordData object (To store user actions)
+			data = new RecordData(statusConsole);
 
 			// Init jnativehook
 			try {
@@ -121,16 +127,16 @@ public class Main extends JFrame implements ActionListener, KeyListener {
 			}
 
 			// Init Keyboard Listener
-			keyboardListener = new GlobalKeyboardListener(newRecord);
+			keyboardListener = new GlobalKeyboardListener(data, statusConsole);
 			GlobalScreen.getInstance().addNativeKeyListener(keyboardListener);
 
 			// Init Mouse Click/Movement Listener
-			mouseListener = new GlobalMouseListener(newRecord);
+			mouseListener = new GlobalMouseListener(data, statusConsole);
 			GlobalScreen.getInstance().addNativeMouseListener(mouseListener);
 			GlobalScreen.getInstance().addNativeMouseMotionListener(mouseListener);
 
 			// Init Mouse Wheel Listener
-			mouseWheelListener = new GlobalMouseWheelListener(newRecord);
+			mouseWheelListener = new GlobalMouseWheelListener(data, statusConsole);
 			GlobalScreen.getInstance().addNativeMouseWheelListener(mouseWheelListener);
 
 			stopRecording.setEnabled(true);
@@ -153,11 +159,12 @@ public class Main extends JFrame implements ActionListener, KeyListener {
 
 		} else if(eventId == ButtonAction.REPLAY) {
 			
-			this.pb = new Playback(newRecord, statusConsole);
-			pb.start();
+			// Start a new thread to playback the recorded actions
+			this.playbackThread = new Playback(data, statusConsole);
+			playbackThread.start();
 
 		} else {
-			statusConsole.append("Command Not Recognized\n");
+			statusConsole.append("Command not recognized\n");
 		}
 	}
 
@@ -172,7 +179,7 @@ public class Main extends JFrame implements ActionListener, KeyListener {
 		int keyCode = event.getKeyCode();
 		ButtonAction action = null;
 		
-		System.out.println("Anything!");
+		statusConsole.append("Anything");
 		
 		// Logic for hotkeys
 		switch( keyCode ) { 
@@ -203,11 +210,12 @@ public class Main extends JFrame implements ActionListener, KeyListener {
 
 	// Unused
 	public void keyReleased(KeyEvent arg0) {}
+	
 	public void keyTyped(KeyEvent event) {}
 
 	// Shortcut debug function (not used)
 	static void p(Object s) {
-		System.out.println(s.toString());
+		System.out.println(s);
 	}
 
 }

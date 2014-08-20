@@ -1,11 +1,14 @@
-package com.github.thbrown.actionRecorder;
+package com.github.thbrown.actionrecorder;
 import org.jnativehook.mouse.NativeMouseEvent;
 import org.jnativehook.mouse.NativeMouseInputListener;
 
 public class GlobalMouseListener implements NativeMouseInputListener {
 
-	Record record;
-	public GlobalMouseListener(Record newRecord) {
+	RecordData record;
+	private StatusArea statusConsole;
+	
+	public GlobalMouseListener(RecordData newRecord, StatusArea statusConsole) {
+		this.statusConsole = statusConsole;
 		this.record = newRecord;
 	}
 
@@ -15,12 +18,12 @@ public class GlobalMouseListener implements NativeMouseInputListener {
 
 	public void nativeMousePressed(NativeMouseEvent e) {
 		System.out.println("Mouse Pressed: " + e.getButton());
-		record.addCommand(new Command(CommandType.MOUSE_PRESS, Integer.toString(e.getButton())));
+		record.addCommand(new Command(CommandType.MOUSE_PRESS, Integer.toString(e.getButton()), statusConsole));
 	}
 
 	public void nativeMouseReleased(NativeMouseEvent e) {
 		System.out.println("Mouse Released: " + e.getButton());
-		record.addCommand(new Command(CommandType.MOUSE_RELEASE, Integer.toString(e.getButton())));
+		record.addCommand(new Command(CommandType.MOUSE_RELEASE, Integer.toString(e.getButton()), statusConsole));
 	}
 
 	public void nativeMouseMoved(NativeMouseEvent e) {

@@ -1,4 +1,4 @@
-package com.github.thbrown.actionRecorder;
+package com.github.thbrown.actionrecorder;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
 
@@ -7,8 +7,11 @@ public class Command {
 	CommandType type;
 	String args1;
 	String args2;
+	
+	StatusArea status;
 
-	Command(CommandType type, String args1) {
+	Command(CommandType type, String args1, StatusArea status) {
+		this.status = status;
 		this.type = type;
 		this.args1 = args1;
 	}
@@ -30,7 +33,7 @@ public class Command {
 			case 1: r.mousePress(InputEvent.BUTTON1_MASK); break;
 			case 2: r.mousePress(InputEvent.BUTTON2_MASK); break;
 			case 3: r.mousePress(InputEvent.BUTTON3_MASK); break;
-			default: System.out.println("Mouse " + this.args1 + " Button Not Recognized A");
+			default: status.append("Mouse " + this.args1 + " Button Not Recognized A");
 			}
 			break;
 		case MOUSE_RELEASE:
@@ -38,7 +41,7 @@ public class Command {
 			case 1: r.mouseRelease(InputEvent.BUTTON1_MASK); break;
 			case 2: r.mouseRelease(InputEvent.BUTTON2_MASK); break;
 			case 3: r.mouseRelease(InputEvent.BUTTON3_MASK); break;
-			default: System.out.println("Mouse " + this.args1 + " Button Not Recognized B");
+			default: status.append("Mouse " + this.args1 + " Button Not Recognized B");
 			}
 			break;
 		case KEY_PRESS:

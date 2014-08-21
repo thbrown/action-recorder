@@ -3,21 +3,20 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * This class stores a list of recorded actions.
+ * This class accepts commands and stores them in a list. The commands in the list can then me accessed and modified by the provided methods.
  *  
  * @author thbrown
  */
-public class RecordData {
+public class ListStorage implements Storage {
 
-	List<Command> data;
-	long timeBetweenCommands;
-	
+	private List<Command> data;
+	private long timeLastCommandWasAdded;
 	private StatusArea statusConsole;
 	
-	public RecordData(StatusArea statusConsole) {
+	public ListStorage(StatusArea statusConsole) {
 		this.statusConsole = statusConsole;
 		data = new LinkedList<Command>();
-		timeBetweenCommands = 0;
+		timeLastCommandWasAdded = System.currentTimeMillis();
 	}
 
 	/**
@@ -26,19 +25,19 @@ public class RecordData {
 	 * 
 	 * @param toAdd	the type of command to add to the command list
 	 */
-	public synchronized void addCommand(Command toAdd) {
+	public void addCommand(Command toAdd) {
 		
 		// Determine how much time has elapsed between the last added command. Add a sleep command to the list for that amount of time.
 		// TODO: convert to nano time for guaranteed positive elapsed times
-		if(timeBetweenCommands != 0) {
-			timeBetweenCommands = System.currentTimeMillis() - timeBetweenCommands;
-			data.add(new Command(CommandType.SLEEP,Long.toString(timeBetweenCommands), statusConsole));
-			System.out.println("SLEEP " + timeBetweenCommands);
-		}
+		long timeBetweenCommands = System.currentTimeMillis() - timeLastCommandWasAdded;
+		Command sleepCommand = new Command(CommandType.SLEEP,Long.toString(timeBetweenCommands), statusConsole);
+		data.add(sleepCommand);
+		statusConsole.append(sleepCommand.toString());
 		
 		// Add the supplied command to the data list
 		data.add(toAdd);
-		timeBetweenCommands = System.currentTimeMillis();
+		statusConsole.append(toAdd.toString());
+		timeLastCommandWasAdded = System.currentTimeMillis();
 	}
 	
 	public List<Command> getCommandList() {
@@ -47,6 +46,12 @@ public class RecordData {
 
 	public void compress() {
 		// TODO: Method for compressing record for storage
+	}
+
+	@Override
+	public void reset() {
+		data.clear();
+		timeLastCommandWasAdded = System.currentTimeMillis();
 	}
 
 }

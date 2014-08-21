@@ -63,7 +63,7 @@ public class Command {
 			}
 			break;
 		default:
-			System.err.println("Error! Command Not Recognized!");
+			status.append("Error! Command Not Recognized!");
 		}
 	}
 

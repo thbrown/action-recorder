@@ -4,17 +4,20 @@ import org.jnativehook.mouse.NativeMouseWheelListener;
 
 public class GlobalMouseWheelListener implements NativeMouseWheelListener {
 
-	RecordData record; 
+	private Storage record; 
 	private StatusArea statusConsole;
 	
-	public GlobalMouseWheelListener(RecordData record, StatusArea statusConsole) {
+	public GlobalMouseWheelListener(Storage data, StatusArea statusConsole) {
 		this.statusConsole = statusConsole;
-		this.record = record;
+		this.record = data;
 	}
 
 	public void nativeMouseWheelMoved(NativeMouseWheelEvent e) {
-		System.out.println("Mosue Wheel Moved: " + e.getWheelRotation());
 		record.addCommand(new Command(CommandType.MOUSE_WHEEL_MOVE, Integer.toString(e.getWheelRotation()), statusConsole));
+	}
+	
+	public void setStorageObject(Storage s) {
+		this.record = s;
 	}
 
 }

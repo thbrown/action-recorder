@@ -4,26 +4,28 @@ import org.jnativehook.keyboard.NativeKeyListener;
 
 public class GlobalKeyboardListener implements NativeKeyListener {
 
-	RecordData record;
+	Storage record;
 	private StatusArea statusConsole;
 
-	public GlobalKeyboardListener(RecordData record, StatusArea statusConsole) {
+	public GlobalKeyboardListener(Storage data, StatusArea statusConsole) {
 		this.statusConsole = statusConsole;
-		this.record = record;
+		this.record = data;
 	}
 
 	public void nativeKeyPressed(NativeKeyEvent e) {
-		System.out.println("Key Pressed: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
 		record.addCommand(new Command(CommandType.KEY_PRESS, Integer.toString(e.getKeyCode()), statusConsole));
 	}
 
 	public void nativeKeyReleased(NativeKeyEvent e) {
-		System.out.println("Key Released: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
 		record.addCommand(new Command(CommandType.KEY_RELEASE, Integer.toString(e.getKeyCode()), statusConsole));
 	}
 
 	public void nativeKeyTyped(NativeKeyEvent e) {
 		// Not Used
+	}
+	
+	public void setStorageObject(Storage s) {
+		this.record = s;
 	}
 
 }

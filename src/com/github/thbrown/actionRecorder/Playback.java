@@ -16,12 +16,12 @@ public class Playback extends Thread {
 	
 	// The text area on the UI, used to show status updates
 	private StatusArea statusConsole;
-	private RecordData newRecord;
+	private Storage newRecord;
 	
-	Playback(RecordData newRecord, StatusArea statusConsole) {
+	Playback(Storage dataHolder, StatusArea statusConsole) {
 		run = true;
 		this.statusConsole = statusConsole;
-		this.newRecord = newRecord;
+		this.newRecord = dataHolder;
 	}
 	
 	public void requestThreadStop() {

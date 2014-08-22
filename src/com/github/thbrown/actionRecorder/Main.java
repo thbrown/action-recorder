@@ -16,8 +16,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.text.DefaultCaret;
 
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
@@ -32,7 +34,6 @@ public class Main extends JFrame implements ActionListener {
 
 	// UI objects
 	private JPanel mainPanel;
-	private JLabel escapeInstructions;
 	private JButton startRecording;
 	private JButton stopRecording;
 	private JButton replay;
@@ -120,7 +121,9 @@ public class Main extends JFrame implements ActionListener {
 		buttonPanel.add(replay);
 		p.add(buttonPanel, BorderLayout.NORTH);
 
-		statusConsole = new StatusArea();	
+		statusConsole = new StatusArea(13, 40);
+		DefaultCaret caret = (DefaultCaret)statusConsole.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 
 		JScrollPane scrollPane = new JScrollPane(statusConsole);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -164,6 +167,10 @@ public class Main extends JFrame implements ActionListener {
 			replay.setEnabled(true);
 
 		} else if(eventId == ButtonAction.REPLAY) {
+			
+			replay.setEnabled(false);
+			stopRecording.setEnabled(false);
+			replay.setEnabled(true);
 			
 			// Start a new thread to playback the recorded actions
 			this.playbackThread = new Playback(dataHolder, statusConsole);

@@ -9,8 +9,16 @@ import javax.swing.JTextArea;
  */
 public class StatusArea extends JTextArea {
 	
+	StatusArea(int i, int j) {
+		super(i,j);
+		initialize();
+	}
+	
 	StatusArea() {
-		
+		initialize();
+	}
+	
+	public void initialize() {
 		this.setEditable(false);
 		this.append("Welcome to Action Recorder!");
 		this.append("Press the 'Record' button to begin recording mouse and keyboard commands");

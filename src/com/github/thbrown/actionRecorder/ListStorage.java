@@ -3,7 +3,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * This class accepts commands and stores them in a list. The commands in the list can then me accessed and modified by the provided methods.
+ * This class accepts commands and stores them in a list. The commands in the list can then be accessed and modified by the provided methods.
  *  
  * @author thbrown
  */
@@ -53,5 +53,5 @@ public class ListStorage implements Storage {
 		data.clear();
 		timeLastCommandWasAdded = System.currentTimeMillis();
 	}
-
+	
 }

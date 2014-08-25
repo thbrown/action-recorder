@@ -29,7 +29,7 @@ public class GlobalMouseListener implements NativeMouseInputListener {
 	}
 
 	public void nativeMouseDragged(NativeMouseEvent e) {
-		// Not Used
+		record.addCommand(new Command(CommandType.MOUSE_MOVE, Integer.toString(e.getX()), Integer.toString(e.getY())));
 	}
 	
 	public void setStorageObject(Storage s) {

@@ -3,7 +3,7 @@ package com.github.thbrown.actionrecorder;
 import javax.swing.JTextArea;
 
 /**
- * This class is a overridden JTextArea used to show program updates and errors on the UI
+ * This class is an extended JTextArea used to show program updates and errors on the UI
  * 
  * @author thbrown
  */
@@ -35,6 +35,7 @@ public class StatusArea extends JTextArea {
 		
 		synchronized(this) {
 			super.append(toAppend + '\n');
+			super.setCaretPosition(super.getDocument().getLength());
 		}
 		
 		System.out.println(toAppend);

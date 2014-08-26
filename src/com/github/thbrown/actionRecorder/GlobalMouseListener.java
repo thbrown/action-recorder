@@ -28,6 +28,7 @@ public class GlobalMouseListener implements NativeMouseInputListener {
 		record.addCommand(new Command(CommandType.MOUSE_MOVE, Integer.toString(e.getX()), Integer.toString(e.getY())));
 	}
 
+	// Dragging the mouse is the same thing as moving it (as mouse presses and releases are recorded)
 	public void nativeMouseDragged(NativeMouseEvent e) {
 		record.addCommand(new Command(CommandType.MOUSE_MOVE, Integer.toString(e.getX()), Integer.toString(e.getY())));
 	}

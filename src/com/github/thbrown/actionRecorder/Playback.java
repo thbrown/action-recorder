@@ -37,7 +37,7 @@ public class Playback extends Thread {
 			executingRobot = new Robot();
 		} catch (AWTException e) {
 			e.printStackTrace();
-			statusConsole.append("Error: Unable to start java robot\n");
+			statusConsole.append("Error: Unable to start java robot");
 			return;
 		}
 		
@@ -47,7 +47,7 @@ public class Playback extends Thread {
 				break;
 			}
 			c.execute(executingRobot);
-			statusConsole.append(c.toString() + "\n");
+			statusConsole.append(c.toString());
 		}
 	}
 

@@ -14,6 +14,9 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -58,7 +61,7 @@ public class Main extends JFrame implements ActionListener {
 
 	public Main(String title) {
 		setTitle(title);
-		setPreferredSize(new Dimension(500,300));
+		setPreferredSize(new Dimension(500,350));
 		setMinimumSize(getPreferredSize());
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -66,6 +69,25 @@ public class Main extends JFrame implements ActionListener {
 		this.addContent(mainPanel);
 		this.add(mainPanel, BorderLayout.CENTER);
 		this.setFocusable(true);
+		
+		//Create the menu bar.
+		JMenuBar menuBar = new JMenuBar();
+
+		//Build the first menu.
+		JMenu menu = new JMenu("File");
+		menu.setMnemonic(KeyEvent.VK_A);
+		menu.getAccessibleContext().setAccessibleDescription("The only menu in this program that has menu items");
+		menuBar.add(menu);
+
+		//a group of JMenuItems
+		JMenuItem menuItem = new JMenuItem("Exit", KeyEvent.VK_T);
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
+		menuItem.getAccessibleContext().setAccessibleDescription("This doesn't really do anything");
+		menuItem.addActionListener(this);
+		menu.add(menuItem);
+		
+		// Attach the menu to the JFrame
+		this.setJMenuBar(menuBar);
 		
 		// Initialize storage objects, one that saves command data and one that discards it
 		dataHolder = new ListStorage(statusConsole);
@@ -177,14 +199,20 @@ public class Main extends JFrame implements ActionListener {
 			playbackThread.start();
 
 		} else {
-			statusConsole.append("Command not recognized\n");
+			statusConsole.append("Command not recognized: " + eventId.toString());
 		}
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent event) {
-		ButtonAction buttonId = (ButtonAction) ((JComponent) event.getSource()).getClientProperty("id");
-		processButtonPress(buttonId);
+		if(event.getSource() instanceof JButton) {
+			ButtonAction buttonId = (ButtonAction) ((JComponent) event.getSource()).getClientProperty("id");
+			processButtonPress(buttonId);
+		} else if(event.getSource() instanceof JMenuItem) {
+			System.exit(0);
+		} else {
+			statusConsole.append("Unrecognized action: " + event.toString());
+		}
 	}
 
 	// Shortcut debug function (not used)

@@ -6,6 +6,7 @@ public class GlobalKeyboardListener implements NativeKeyListener {
 
 	Storage record;
 	private StatusArea statusConsole;
+	private Hotkey hotkey;
 
 	public GlobalKeyboardListener(Storage data, StatusArea statusConsole) {
 		this.statusConsole = statusConsole;
@@ -14,10 +15,13 @@ public class GlobalKeyboardListener implements NativeKeyListener {
 
 	public void nativeKeyPressed(NativeKeyEvent e) {
 		record.addCommand(new Command(CommandType.KEY_PRESS, Integer.toString(e.getKeyCode()), statusConsole));
+		hotkey.add(e.getKeyCode());
+		hotkey.checkForAndExecuteHotkeys();
 	}
 
 	public void nativeKeyReleased(NativeKeyEvent e) {
 		record.addCommand(new Command(CommandType.KEY_RELEASE, Integer.toString(e.getKeyCode()), statusConsole));
+		hotkey.remove(e.getKeyCode());
 	}
 
 	public void nativeKeyTyped(NativeKeyEvent e) {
@@ -26,6 +30,10 @@ public class GlobalKeyboardListener implements NativeKeyListener {
 	
 	public void setStorageObject(Storage s) {
 		this.record = s;
+	}
+	
+	public void setHotkeyObject(Hotkey h) {
+		this.hotkey = h;
 	}
 
 }

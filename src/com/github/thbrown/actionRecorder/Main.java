@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -70,16 +71,16 @@ public class Main extends JFrame implements ActionListener {
 		this.add(mainPanel, BorderLayout.CENTER);
 		this.setFocusable(true);
 		
-		//Create the menu bar.
+		// Create the menu bar.
 		JMenuBar menuBar = new JMenuBar();
 
-		//Build the first menu.
+		// Build the first menu.
 		JMenu menu = new JMenu("File");
 		menu.setMnemonic(KeyEvent.VK_A);
 		menu.getAccessibleContext().setAccessibleDescription("The only menu in this program that has menu items");
 		menuBar.add(menu);
 
-		//a group of JMenuItems
+		// A group of JMenuItems
 		JMenuItem menuItem = new JMenuItem("Exit", KeyEvent.VK_T);
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
 		menuItem.getAccessibleContext().setAccessibleDescription("This doesn't really do anything");
@@ -116,6 +117,10 @@ public class Main extends JFrame implements ActionListener {
 		// Initialize the jnativehook Mouse Wheel Listener
 		mouseWheelListener = new GlobalMouseWheelListener(dataGarbageCan, statusConsole);
 		GlobalScreen.getInstance().addNativeMouseWheelListener(mouseWheelListener);
+		
+		// Begin checking for hotkey presses
+		Hotkey hotkey = new Hotkey(this);
+		keyboardListener.setHotkeyObject(hotkey);
 	}
 
 	/**
@@ -170,7 +175,7 @@ public class Main extends JFrame implements ActionListener {
 			keyboardListener.setStorageObject(dataHolder);
 			mouseListener.setStorageObject(dataHolder);
 			mouseWheelListener.setStorageObject(dataHolder);
-
+			
 			// Disable the 'Stop Recording' button
 			stopRecording.setEnabled(true);
 
@@ -209,25 +214,28 @@ public class Main extends JFrame implements ActionListener {
 			ButtonAction buttonId = (ButtonAction) ((JComponent) event.getSource()).getClientProperty("id");
 			processButtonPress(buttonId);
 		} else if(event.getSource() instanceof JMenuItem) {
-			System.exit(0);
+			this.quit();
 		} else {
 			statusConsole.append("Unrecognized action: " + event.toString());
 		}
+	}
+	
+	/**
+	 *	Cleanup and quit the application
+	 */
+	public void quit() {
+		GlobalScreen.getInstance().removeNativeKeyListener(keyboardListener);
+		GlobalScreen.getInstance().removeNativeMouseListener(mouseListener);
+		GlobalScreen.getInstance().removeNativeMouseMotionListener(mouseListener);
+		GlobalScreen.getInstance().removeNativeMouseWheelListener(mouseWheelListener);
+		GlobalScreen.unregisterNativeHook();
+		System.exit(0);
 	}
 
 	// Shortcut debug function (not used)
 	static void p(Object s) {
 		System.out.println(s);
 	}
-	
-	/* This code may be useful later...
-		// Disable jnativehook
-		GlobalScreen.getInstance().removeNativeKeyListener(keyboardListener);
-		GlobalScreen.getInstance().removeNativeMouseListener(mouseListener);
-		GlobalScreen.getInstance().removeNativeMouseMotionListener(mouseListener);
-		GlobalScreen.getInstance().removeNativeMouseWheelListener(mouseWheelListener);
-		GlobalScreen.unregisterNativeHook();
-	 */
 
 }
 

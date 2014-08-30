@@ -12,7 +12,7 @@ public class GlobalMouseWheelListener implements NativeMouseWheelListener {
 		this.record = data;
 	}
 
-	public void nativeMouseWheelMoved(NativeMouseWheelEvent e) {
+	public void nativeMouseWheelMoved(NativeMouseWheelEvent e) { 
 		record.addCommand(new Command(CommandType.MOUSE_WHEEL_MOVE, Integer.toString(e.getWheelRotation()), statusConsole));
 	}
 	

@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -34,7 +35,7 @@ import org.jnativehook.NativeHookException;
  * This applications records mouse and keyboard presses and mouse movement. The recordings can then be played back.
  * @author thbrown
  */
-public class Main extends JFrame implements ActionListener {
+public class Main extends JFrame implements ActionListener, WindowListener {
 
 	// UI objects
 	private JPanel mainPanel;
@@ -64,7 +65,7 @@ public class Main extends JFrame implements ActionListener {
 		setTitle(title);
 		setPreferredSize(new Dimension(500,350));
 		setMinimumSize(getPreferredSize());
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		this.addWindowListener(this);
 
 		mainPanel = new JPanel();
 		this.addContent(mainPanel);
@@ -208,6 +209,24 @@ public class Main extends JFrame implements ActionListener {
 		}
 	}
 
+	/**
+	 *	Cleanup and quit the application
+	 */
+	public void quit() {
+		System.out.println("Exiting Action Listener");
+		GlobalScreen.getInstance().removeNativeKeyListener(keyboardListener);
+		GlobalScreen.getInstance().removeNativeMouseListener(mouseListener);
+		GlobalScreen.getInstance().removeNativeMouseMotionListener(mouseListener);
+		GlobalScreen.getInstance().removeNativeMouseWheelListener(mouseWheelListener);
+		GlobalScreen.unregisterNativeHook();
+		System.exit(0);
+	}
+	
+	@Override
+	public void windowClosing(WindowEvent e) {
+		this.quit();
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent event) {
 		if(event.getSource() instanceof JButton) {
@@ -219,23 +238,26 @@ public class Main extends JFrame implements ActionListener {
 			statusConsole.append("Unrecognized action: " + event.toString());
 		}
 	}
-	
-	/**
-	 *	Cleanup and quit the application
-	 */
-	public void quit() {
-		GlobalScreen.getInstance().removeNativeKeyListener(keyboardListener);
-		GlobalScreen.getInstance().removeNativeMouseListener(mouseListener);
-		GlobalScreen.getInstance().removeNativeMouseMotionListener(mouseListener);
-		GlobalScreen.getInstance().removeNativeMouseWheelListener(mouseWheelListener);
-		GlobalScreen.unregisterNativeHook();
-		System.exit(0);
-	}
 
 	// Shortcut debug function (not used)
 	static void p(Object s) {
 		System.out.println(s);
 	}
+
+	// Unused methods required by the WindowListener interface
+	@Override
+	public void windowOpened(WindowEvent e) {}
+	@Override
+	public void windowClosed(WindowEvent e) {}
+	@Override
+	public void windowIconified(WindowEvent e) {}
+	@Override
+	public void windowDeiconified(WindowEvent e) {}
+	@Override
+	public void windowActivated(WindowEvent e) {}
+	@Override
+	public void windowDeactivated(WindowEvent e) {}
+	
 
 }
 

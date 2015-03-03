@@ -157,6 +157,12 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		p.add(scrollPane, BorderLayout.SOUTH);
 	}
+	
+	public void requestPlaybackThreadStop() {
+		if(playbackThread != null) {
+			playbackThread.requestPlaybackThreadStop();
+		}
+	}
 
 	/**
 	 * Executes code for the specified button press.
@@ -164,9 +170,7 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 	 * @param eventId	the type of button that was pressed
 	 */
 	public void processButtonPress(ButtonAction eventId) {
-		
 		if(eventId == ButtonAction.START_RECORDING) {
-
 			// Disable the startRecording/replay buttons
 			startRecording.setEnabled(false);
 			replay.setEnabled(false);
@@ -179,9 +183,8 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 			
 			// Disable the 'Stop Recording' button
 			stopRecording.setEnabled(true);
-
-		} else if(eventId == ButtonAction.STOP_RECORDING) {
 			
+		} else if(eventId == ButtonAction.STOP_RECORDING) {
 			// Disable the stopRecording button
 			stopRecording.setEnabled(false);
 			
@@ -195,7 +198,6 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 			replay.setEnabled(true);
 
 		} else if(eventId == ButtonAction.REPLAY) {
-			
 			replay.setEnabled(false);
 			stopRecording.setEnabled(false);
 			replay.setEnabled(true);

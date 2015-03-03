@@ -14,9 +14,9 @@ public class GlobalKeyboardListener implements NativeKeyListener {
 	}
 
 	public void nativeKeyPressed(NativeKeyEvent e) {
-		record.addCommand(new Command(CommandType.KEY_PRESS, Integer.toString(e.getKeyCode()), statusConsole));
 		hotkey.add(e.getKeyCode());
 		hotkey.checkForAndExecuteHotkeys();
+		record.addCommand(new Command(CommandType.KEY_PRESS, Integer.toString(e.getKeyCode()), statusConsole));
 	}
 
 	public void nativeKeyReleased(NativeKeyEvent e) {

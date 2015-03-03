@@ -27,8 +27,10 @@ public class Hotkey {
 	
 	public void checkForAndExecuteHotkeys() {
 		System.out.println("Keys pressed: " + pressedKeys);
+		
+		// Escape key was pressed
 		if(pressedKeys.contains(27)) {
-			window.quit();
+			window.requestPlaybackThreadStop();	
 		}
 	}
 

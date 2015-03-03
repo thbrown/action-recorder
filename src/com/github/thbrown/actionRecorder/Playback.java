@@ -11,7 +11,7 @@ import java.awt.Robot;
  */
 public class Playback extends Thread {
 	
-	// Flag variable so the Thread can be halted from the main thread
+	// Flag variable so this Thread can be halted from the main thread
 	private volatile boolean run;
 	
 	// The text area on the UI, used to show status updates
@@ -24,7 +24,7 @@ public class Playback extends Thread {
 		this.newRecord = dataHolder;
 	}
 	
-	public void requestThreadStop() {
+	public void requestPlaybackThreadStop() {
 		run = false;
 	}
 	
@@ -44,6 +44,7 @@ public class Playback extends Thread {
 		// Call execute on each command in the list
 		for(Command c : newRecord.getCommandList()) {
 			if(!run) {
+				statusConsole.append("Aborting playback");
 				break;
 			}
 			c.execute(executingRobot);

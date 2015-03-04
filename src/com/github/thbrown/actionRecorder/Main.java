@@ -1,6 +1,7 @@
 package com.github.thbrown.actionrecorder;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,6 +12,8 @@ import java.awt.event.WindowListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -24,6 +27,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
 import javax.swing.text.DefaultCaret;
 
 import org.jnativehook.GlobalScreen;
@@ -43,6 +48,9 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 	private JButton stopRecording;
 	private JButton replay;
 	private StatusArea statusConsole;
+	private JLabel mousePositionTextDataLabel;
+	private JLabel mouseColorTextDataLabel;
+	private JPanel mouseColorDataLabel;
 
 	// JNativeHook library objects
 	private GlobalKeyboardListener keyboardListener;
@@ -56,6 +64,11 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 	// A handle for the thread used to playback data
 	private Playback playbackThread;
 	
+	// Layout parameters
+	private static final int MOUSE_INFO_PANEL_HEIGHT = 25;
+	private static final int MOUSE_INFO_PANEL_COLOR_WIDTH = 50;
+	private static final int MOUSE_INFO_PANEL_COLOR_TEXT_WIDTH = 85;
+	
 	public static void main(String[] args) {
 		Main m = new Main("ActionRecorder");
 		m.setVisible(true);
@@ -68,7 +81,7 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 		this.addWindowListener(this);
 
 		mainPanel = new JPanel();
-		this.addContent(mainPanel);
+		this.addUIComponents(mainPanel);
 		this.add(mainPanel, BorderLayout.CENTER);
 		this.setFocusable(true);
 		
@@ -111,7 +124,7 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 		GlobalScreen.getInstance().addNativeKeyListener(keyboardListener);
 
 		// Initialize the jnativehook Mouse Click/Movement Listener
-		mouseListener = new GlobalMouseListener(dataGarbageCan, statusConsole);
+		mouseListener = new GlobalMouseListener(dataGarbageCan, statusConsole, this);
 		GlobalScreen.getInstance().addNativeMouseListener(mouseListener);
 		GlobalScreen.getInstance().addNativeMouseMotionListener(mouseListener);
 
@@ -119,17 +132,20 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 		mouseWheelListener = new GlobalMouseWheelListener(dataGarbageCan, statusConsole);
 		GlobalScreen.getInstance().addNativeMouseWheelListener(mouseWheelListener);
 		
+		// 
+		
 		// Begin checking for hotkey presses
 		Hotkey hotkey = new Hotkey(this);
 		keyboardListener.setHotkeyObject(hotkey);
 	}
 
 	/**
-	 * Adds UI elements (Record, Stop, and Replay buttons plus the status JTextArea) to the specified panel.
+	 * Adds UI elements (Record, Stop, and Replay buttons, the status JTextArea, and mouse info bar) to the specified panel.
 	 * 
 	 * @param p	the panel to add the UI elements to
 	 */
-	public void addContent(JPanel p) {
+	public void addUIComponents(JPanel p) {
+		// Buttons
 		JPanel buttonPanel = new JPanel();
 		startRecording = new JButton("Record");
 		startRecording.putClientProperty("id",ButtonAction.START_RECORDING);
@@ -149,6 +165,7 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 		buttonPanel.add(replay);
 		p.add(buttonPanel, BorderLayout.NORTH);
 
+		// Status Area
 		statusConsole = new StatusArea(13, 40);
 		DefaultCaret caret = (DefaultCaret)statusConsole.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
@@ -156,6 +173,44 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 		JScrollPane scrollPane = new JScrollPane(statusConsole);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		p.add(scrollPane, BorderLayout.SOUTH);
+		
+		// Mouse Info Bar
+		JLabel mousePositionLabel = new JLabel("Position: ");
+		mousePositionLabel.setHorizontalAlignment(SwingConstants.LEFT);
+		
+		mousePositionTextDataLabel = new JLabel();
+		mousePositionTextDataLabel.setHorizontalAlignment(SwingConstants.LEFT);
+		
+		JPanel mousePosition = new JPanel();
+		mousePosition.setLayout(new BoxLayout(mousePosition, BoxLayout.X_AXIS));
+		mousePosition.add(mousePositionLabel);
+		mousePosition.add(mousePositionTextDataLabel);
+		
+		JLabel mouseColorLabel = new JLabel("Mouse Pixel Color: ");
+		mouseColorLabel.setHorizontalAlignment(SwingConstants.LEFT);
+		
+		mouseColorTextDataLabel = new JLabel();
+		mouseColorTextDataLabel.setPreferredSize(new Dimension(Main.MOUSE_INFO_PANEL_COLOR_TEXT_WIDTH, Main.MOUSE_INFO_PANEL_HEIGHT));
+		mouseColorTextDataLabel.setHorizontalAlignment(SwingConstants.LEFT);
+		
+		mouseColorDataLabel = new JPanel();
+		mouseColorDataLabel.setPreferredSize(new Dimension(Main.MOUSE_INFO_PANEL_COLOR_WIDTH, Main.MOUSE_INFO_PANEL_HEIGHT));
+		mouseColorDataLabel.setOpaque(true);
+		mouseColorDataLabel.setBorder(BorderFactory.createLineBorder(Color.black));
+		
+		JPanel mouseColor = new JPanel();
+		mouseColor.setLayout(new BoxLayout(mouseColor, BoxLayout.X_AXIS));
+		mouseColor.add(mouseColorLabel);
+		mouseColor.add(mouseColorTextDataLabel);
+		mouseColor.add(mouseColorDataLabel);
+		
+		JPanel mouseInfoPanel = new JPanel(new BorderLayout());
+		mouseInfoPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+		mouseInfoPanel.setPreferredSize(new Dimension(this.getWidth(), Main.MOUSE_INFO_PANEL_HEIGHT));
+		mouseInfoPanel.add(mousePosition, BorderLayout.WEST);
+		mouseInfoPanel.add(mouseColor, BorderLayout.EAST);
+		this.add(mouseInfoPanel, BorderLayout.SOUTH);
+
 	}
 	
 	public void requestPlaybackThreadStop() {
@@ -209,6 +264,16 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 		} else {
 			statusConsole.append("Command not recognized: " + eventId.toString());
 		}
+	}
+	
+	public void updateMousePositionLabel(int x, int y) {
+		mousePositionTextDataLabel.setText(x + "," + y);
+	}
+	
+	public void updateMouseColorLabel(int red, int green, int blue) {
+		mouseColorTextDataLabel.setText(" " + red + ", " + green + ", " + blue);
+		mouseColorDataLabel.setForeground(new Color(red,green,blue));
+		mouseColorDataLabel.setBackground(new Color(red,green,blue));
 	}
 
 	/**

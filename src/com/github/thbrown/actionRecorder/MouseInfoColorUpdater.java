@@ -7,9 +7,9 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 /**
- * This class contains a robot class that is used to asynchronously update the mouse infopanel color.
+ * This class contains a robot class that is used to asynchronously update the mouseInfoPanel color.
  * 
- * This buffer allows events to be canceled before they are executed.
+ * This buffer allows robot getPixelColor(...) calls to be canceled before they are executed.
  *  
  * This class in necessary because getPixelColor(...) can take several hundred ms to complete.
  * 

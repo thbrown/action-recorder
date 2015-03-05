@@ -2,6 +2,8 @@ package com.github.thbrown.actionrecorder;
 
 import java.awt.AWTException;
 import java.awt.Robot;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * This class contains the variables and methods necessary to execute the mouse movements and button presses
@@ -47,8 +49,17 @@ public class Playback extends Thread {
 				statusConsole.append("Aborting playback");
 				break;
 			}
-			c.execute(executingRobot);
 			statusConsole.append(c.toString());
+			try {
+				c.execute(executingRobot);
+			} catch (Exception e) {
+				StringWriter errors = new StringWriter();
+				e.printStackTrace(new PrintWriter(errors));
+				statusConsole.append("Error while running command: " + c.toString());
+				statusConsole.append("Stack trace: \n" + errors.toString());
+				statusConsole.append("Error: " + e.getMessage() + ". Haulting playback execution.");
+				run = false;
+			}
 		}
 	}
 

@@ -1,6 +1,8 @@
 package com.github.thbrown.actionrecorder;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class Command {
 
@@ -23,7 +25,6 @@ public class Command {
 	}
 
 	void execute(Robot r) {
-		System.out.println("Executing: " + this.toString());
 		switch(this.type){
 		case MOUSE_MOVE:
 			r.mouseMove(Integer.parseInt(this.args1),Integer.parseInt(this.args2));

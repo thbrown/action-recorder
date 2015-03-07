@@ -16,6 +16,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -24,9 +25,11 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.text.DefaultCaret;
@@ -47,11 +50,13 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 	private JButton startRecording;
 	private JButton stopRecording;
 	private JButton replay;
+	private JLabel repeatCountLabel;
+	private JSpinner repeatCountSpinner;
 	private StatusArea statusConsole;
 	private JLabel mousePositionTextDataLabel;
 	private JLabel mouseColorTextDataLabel;
 	private JPanel mouseColorDataLabel;
-
+	
 	// JNativeHook library objects
 	private GlobalKeyboardListener keyboardListener;
 	private GlobalMouseListener mouseListener;
@@ -158,10 +163,24 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 		replay.putClientProperty("id", ButtonAction.REPLAY);
 		replay.addActionListener(this);
 		replay.setEnabled(false);
-
+		
+		repeatCountLabel = new JLabel("Times To Repeat");
+		SpinnerNumberModel numModel = new SpinnerNumberModel(1,1,Integer.MAX_VALUE,1);
+		repeatCountSpinner = new JSpinner(numModel);
+		repeatCountSpinner.setPreferredSize(new Dimension(40,20));
+		repeatCountSpinner.setEnabled(false);
+		repeatCountLabel.setEnabled(false);
+		
+		//JLabel infinityCheckboxLabel = new JLabel("Infinity");
+		//JCheckBox infinityCheckBox = new JCheckBox();
+		
 		buttonPanel.add(startRecording);
 		buttonPanel.add(stopRecording);
 		buttonPanel.add(replay);
+		buttonPanel.add(repeatCountLabel);
+		buttonPanel.add(repeatCountSpinner);
+		//buttonPanel.add(infinityCheckboxLabel);
+		//buttonPanel.add(infinityCheckBox);
 		p.add(buttonPanel, BorderLayout.NORTH);
 
 		// Status Area
@@ -247,9 +266,11 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 			mouseListener.setStorageObject(dataGarbageCan);
 			mouseWheelListener.setStorageObject(dataGarbageCan);
 			
-			// Enable startRecording/replay buttons
+			// Enable startRecording/replay buttons and playback count spinner
 			startRecording.setEnabled(true);
 			replay.setEnabled(true);
+			repeatCountSpinner.setEnabled(true);
+			repeatCountLabel.setEnabled(true);
 
 		} else if(eventId == ButtonAction.REPLAY) {
 			replay.setEnabled(false);
@@ -257,7 +278,7 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 			replay.setEnabled(true);
 			
 			// Start a new thread to playback the recorded actions
-			this.playbackThread = new Playback(dataHolder, statusConsole);
+			this.playbackThread = new Playback(dataHolder, statusConsole, (Integer)repeatCountSpinner.getValue());
 			playbackThread.start();
 
 		} else {

@@ -19,11 +19,13 @@ public class Playback extends Thread {
 	// The text area on the UI, used to show status updates
 	private StatusArea statusConsole;
 	private Storage newRecord;
+	private int numberOfTimesToRepeat;
 	
-	Playback(Storage dataHolder, StatusArea statusConsole) {
+	Playback(Storage dataHolder, StatusArea statusConsole, Integer numberOfTimesToRepeat) {
 		run = true;
 		this.statusConsole = statusConsole;
 		this.newRecord = dataHolder;
+		this.numberOfTimesToRepeat = numberOfTimesToRepeat;
 	}
 	
 	public void requestPlaybackThreadStop() {
@@ -43,24 +45,26 @@ public class Playback extends Thread {
 			return;
 		}
 		
-		// Call execute on each command in the list
-		for(Command c : newRecord.getCommandList()) {
-			if(!run) {
-				statusConsole.append("Aborting playback");
-				break;
-			}
-			statusConsole.append(c.toString());
-			
-			// Sometimes the command can be malformed (e.g. bad key code)
-			try {
-				c.execute(executingRobot);
-			} catch (Exception e) {
-				StringWriter errors = new StringWriter();
-				e.printStackTrace(new PrintWriter(errors));
-				statusConsole.append("Error while running command: " + c.toString());
-				statusConsole.append("Stack trace: \n" + errors.toString());
-				statusConsole.append("Error: " + e.getMessage() + ". Haulting playback execution.");
-				run = false;
+		for(int i=0; i < numberOfTimesToRepeat; i++) {
+			// Call execute on each command in the list
+			for(Command c : newRecord.getCommandList()) {
+				if(!run) {
+					statusConsole.append("Aborting playback");
+					break;
+				}
+				statusConsole.append(c.toString());
+				
+				// Sometimes the command can be malformed (e.g. bad key code)
+				try {
+					c.execute(executingRobot);
+				} catch (Exception e) {
+					StringWriter errors = new StringWriter();
+					e.printStackTrace(new PrintWriter(errors));
+					statusConsole.append("Error while running command: " + c.toString());
+					statusConsole.append("Stack trace: \n" + errors.toString());
+					statusConsole.append("Error: " + e.getMessage() + ". Haulting playback execution.");
+					run = false;
+				}
 			}
 		}
 	}

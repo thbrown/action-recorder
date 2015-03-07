@@ -50,6 +50,8 @@ public class Playback extends Thread {
 				break;
 			}
 			statusConsole.append(c.toString());
+			
+			// Sometimes the command can be malformed (e.g. bad key code)
 			try {
 				c.execute(executingRobot);
 			} catch (Exception e) {

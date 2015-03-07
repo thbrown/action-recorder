@@ -3,60 +3,66 @@ import java.awt.Robot;
 import java.awt.event.InputEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Command {
 
-	CommandType type;
-	String args1;
-	String args2;
+	private CommandType type;
+	
+	// Consider instantiating this only if there are arguments
+	private List<Integer> arguments = new ArrayList<Integer>();
 	
 	StatusArea status;
 
-	Command(CommandType type, String args1, StatusArea status) {
-		this.status = status;
+	Command(StatusArea whereToSendStatusUpdates, CommandType type, Integer... arguments) {
+		this.status = whereToSendStatusUpdates;
 		this.type = type;
-		this.args1 = args1;
+	    for(Integer argument : arguments){
+	        this.arguments.add((int)argument);
+	    }
 	}
 
-	public Command(CommandType type, String args1, String args2) {
+	public Command(CommandType type, Integer... arguments) {
 		this.type = type;
-		this.args1 = args1;
-		this.args2 = args2;
+	    for(Integer argument : arguments){
+	        this.arguments.add((int)argument);
+	    }
 	}
 
 	void execute(Robot r) {
 		switch(this.type){
 		case MOUSE_MOVE:
-			r.mouseMove(Integer.parseInt(this.args1),Integer.parseInt(this.args2));
+			r.mouseMove(arguments.get(0),this.arguments.get(1));
 			break;
 		case MOUSE_PRESS:
-			switch(Integer.parseInt(this.args1)) {
+			switch(this.arguments.get(0)) {
 			case 1: r.mousePress(InputEvent.BUTTON1_MASK); break;
 			case 2: r.mousePress(InputEvent.BUTTON2_MASK); break;
 			case 3: r.mousePress(InputEvent.BUTTON3_MASK); break;
-			default: status.append("Mouse " + this.args1 + " Button Not Recognized A");
+			default: status.append("Mouse " + this.arguments.get(0) + " Button Not Recognized A");
 			}
 			break;
 		case MOUSE_RELEASE:
-			switch(Integer.parseInt(this.args1)) {
+			switch(this.arguments.get(0)) {
 			case 1: r.mouseRelease(InputEvent.BUTTON1_MASK); break;
 			case 2: r.mouseRelease(InputEvent.BUTTON2_MASK); break;
 			case 3: r.mouseRelease(InputEvent.BUTTON3_MASK); break;
-			default: status.append("Mouse " + this.args1 + " Button Not Recognized B");
+			default: status.append("Mouse " + this.arguments.get(0) + " Button Not Recognized B");
 			}
 			break;
 		case KEY_PRESS:
-			r.keyPress(Integer.parseInt(args1));
+			r.keyPress(arguments.get(0));
 			break;
 		case KEY_RELEASE:
-			r.keyRelease(Integer.parseInt(args1));
+			r.keyRelease(arguments.get(0));
 			break;
 		case MOUSE_WHEEL_MOVE:
-			r.mouseWheel(Integer.parseInt(args1));
+			r.mouseWheel(arguments.get(0));
 			break;
 		case SLEEP:
 			try {
-				Thread.sleep(Integer.parseInt(this.args1));
+				Thread.sleep(this.arguments.get(0));
 			} catch (NumberFormatException e) {
 				e.printStackTrace();
 			} catch (InterruptedException e) {
@@ -67,8 +73,21 @@ public class Command {
 			status.append("Error! Command Not Recognized!");
 		}
 	}
+	
+	private static String formatArguments(List<Integer> arguments) {
+		StringBuilder result = new StringBuilder();
+		result.append("(");
+		String prefix = "";
+		for(Integer argument : arguments) {
+			result.append(prefix);
+			result.append(argument.toString());
+			prefix = ",";
+		}
+		result.append(");");
+		return result.toString();
+	}
 
 	public String toString() {
-		return type.toString() + " " + args1 + " " + args2;
+		return type.toString() + formatArguments(arguments);
 	}
 }

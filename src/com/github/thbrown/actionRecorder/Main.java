@@ -132,8 +132,6 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 		mouseWheelListener = new GlobalMouseWheelListener(dataGarbageCan, statusConsole);
 		GlobalScreen.getInstance().addNativeMouseWheelListener(mouseWheelListener);
 		
-		// 
-		
 		// Begin checking for hotkey presses
 		Hotkey hotkey = new Hotkey(this);
 		keyboardListener.setHotkeyObject(hotkey);

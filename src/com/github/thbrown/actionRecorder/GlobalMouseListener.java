@@ -31,22 +31,22 @@ public class GlobalMouseListener implements NativeMouseInputListener {
 	}
 
 	public void nativeMousePressed(NativeMouseEvent e) {
-		record.addCommand(new Command(CommandType.MOUSE_PRESS, Integer.toString(e.getButton()), statusConsole));
+		record.addCommand(new Command(statusConsole, CommandType.MOUSE_PRESS, e.getButton()));
 	}
 
 	public void nativeMouseReleased(NativeMouseEvent e) {
-		record.addCommand(new Command(CommandType.MOUSE_RELEASE, Integer.toString(e.getButton()), statusConsole));
+		record.addCommand(new Command(statusConsole,CommandType.MOUSE_RELEASE, e.getButton()));
 	}
 
 	public void nativeMouseMoved(NativeMouseEvent e) {
-		record.addCommand(new Command(CommandType.MOUSE_MOVE, Integer.toString(e.getX()), Integer.toString(e.getY())));
+		record.addCommand(new Command(CommandType.MOUSE_MOVE, e.getX(),e.getY()));
 		window.updateMousePositionLabel(e.getX(), e.getY());
 		r.requestColorUpdate(e.getX(), e.getY());
 	}
 
 	// Dragging the mouse is the same thing as moving it (as mouse presses and releases are recorded)
 	public void nativeMouseDragged(NativeMouseEvent e) {
-		record.addCommand(new Command(CommandType.MOUSE_MOVE, Integer.toString(e.getX()), Integer.toString(e.getY())));
+		record.addCommand(new Command(CommandType.MOUSE_MOVE, e.getX(), e.getY()));
 	}
 	
 	public void setStorageObject(Storage s) {

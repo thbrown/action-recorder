@@ -28,10 +28,10 @@ public class ListStorage implements Storage {
 	public void addCommand(Command toAdd) {
 		
 		// Determine how much time has elapsed between the last added command. Add a sleep command to the list for that amount of time.
-		// TODO: convert to nano time for guaranteed positive elapsed times
+		// TODO: consider conversion to nano time for guaranteed positive elapsed times
 		long timeBetweenCommands = System.currentTimeMillis() - timeLastCommandWasAdded;
 		if(timeBetweenCommands > 0) {
-			Command sleepCommand = new Command(CommandType.SLEEP,Long.toString(timeBetweenCommands), statusConsole);
+			Command sleepCommand = new Command(statusConsole, CommandType.SLEEP, (int) timeBetweenCommands);
 			data.add(sleepCommand);
 			statusConsole.append(sleepCommand.toString());
 		}

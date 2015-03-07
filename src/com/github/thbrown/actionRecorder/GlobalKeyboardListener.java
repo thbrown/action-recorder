@@ -16,11 +16,11 @@ public class GlobalKeyboardListener implements NativeKeyListener {
 	public void nativeKeyPressed(NativeKeyEvent e) {
 		hotkey.add(e.getKeyCode());
 		hotkey.checkForAndExecuteHotkeys();
-		record.addCommand(new Command(CommandType.KEY_PRESS, Integer.toString(e.getKeyCode()), statusConsole));
+		record.addCommand(new Command(statusConsole, CommandType.KEY_PRESS, e.getKeyCode()));
 	}
 
 	public void nativeKeyReleased(NativeKeyEvent e) {
-		record.addCommand(new Command(CommandType.KEY_RELEASE, Integer.toString(e.getKeyCode()), statusConsole));
+		record.addCommand(new Command(statusConsole, CommandType.KEY_RELEASE, e.getKeyCode()));
 		hotkey.remove(e.getKeyCode());
 	}
 

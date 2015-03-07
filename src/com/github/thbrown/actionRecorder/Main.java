@@ -157,6 +157,7 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 		replay = new JButton("Replay");
 		replay.putClientProperty("id", ButtonAction.REPLAY);
 		replay.addActionListener(this);
+		replay.setEnabled(false);
 
 		buttonPanel.add(startRecording);
 		buttonPanel.add(stopRecording);

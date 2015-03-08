@@ -49,10 +49,9 @@ public class Playback extends Thread {
 			// Call execute on each command in the list
 			for(Command c : newRecord.getCommandList()) {
 				if(!run) {
-					statusConsole.append("Aborting playback");
+					statusConsole.append("Halting playback");
 					break;
 				}
-				statusConsole.append(c.toString());
 				
 				// Sometimes the command can be malformed (e.g. bad key code)
 				try {

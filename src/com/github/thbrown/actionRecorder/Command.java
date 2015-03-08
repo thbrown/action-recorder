@@ -4,6 +4,7 @@ import java.awt.event.InputEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Command {
@@ -23,11 +24,10 @@ public class Command {
 	    }
 	}
 
-	public Command(CommandType type, Integer... arguments) {
+	public Command(StatusArea whereToSendStatusUpdates, CommandType type, List<Integer> arguments) {
 		this.type = type;
-	    for(Integer argument : arguments){
-	        this.arguments.add((int)argument);
-	    }
+		this.arguments = arguments;
+		this.status = whereToSendStatusUpdates;
 	}
 
 	void execute(Robot r) {
@@ -89,5 +89,26 @@ public class Command {
 
 	public String toString() {
 		return type.toString() + formatArguments(arguments);
+	}
+
+	public static Command parseCommand(String nextStatement, StatusArea statusConsole) throws Exception {
+		// MOUSE_MOVE(69,85)
+		int parameterStartIndex = nextStatement.indexOf('(');
+		if (parameterStartIndex < 0) {
+			throw new RuntimeException("Command does not contain '(' : " + nextStatement);
+		}
+		String command = nextStatement.substring(0, parameterStartIndex);
+		String arguments = nextStatement.substring(parameterStartIndex + 1, nextStatement.length() - 1);
+		String[] parameters = arguments.split(",");
+		List<Integer> parameterList = new ArrayList<Integer>();
+		for(int i=0; i < parameters.length; i++) {
+			parameterList.add(Integer.parseInt(parameters[i]));
+		}
+		for(CommandType type : CommandType.values()) {
+			if(command.equals(type.toString())) {
+				return new Command(statusConsole, type, parameterList);
+			}
+		}
+		throw new RuntimeException("Did not find valid command type: " + nextStatement);
 	}
 }

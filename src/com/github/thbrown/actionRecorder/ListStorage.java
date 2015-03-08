@@ -33,12 +33,10 @@ public class ListStorage implements Storage {
 		if(timeBetweenCommands > 0) {
 			Command sleepCommand = new Command(statusConsole, CommandType.SLEEP, (int) timeBetweenCommands);
 			data.add(sleepCommand);
-			statusConsole.append(sleepCommand.toString());
 		}
 		
 		// Add the supplied command to the data list
 		data.add(toAdd);
-		statusConsole.append(toAdd.toString());
 		timeLastCommandWasAdded = System.currentTimeMillis();
 	}
 	

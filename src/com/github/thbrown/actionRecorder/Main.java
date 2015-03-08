@@ -9,6 +9,14 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.Locale;
+import java.util.Scanner;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -18,6 +26,7 @@ import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -32,6 +41,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
+import javax.swing.plaf.FileChooserUI;
 import javax.swing.text.DefaultCaret;
 
 import org.jnativehook.GlobalScreen;
@@ -73,6 +83,8 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 	private static final int MOUSE_INFO_PANEL_HEIGHT = 25;
 	private static final int MOUSE_INFO_PANEL_COLOR_WIDTH = 50;
 	private static final int MOUSE_INFO_PANEL_COLOR_TEXT_WIDTH = 85;
+	private static final int PLAYBACK_COUNT_SPINNER_HEIGHT = 20;
+	private static final int PLAYBACK_COUNT_SPINNER_WIDTH = 40;
 	
 	public static void main(String[] args) {
 		Main m = new Main("ActionRecorder");
@@ -100,12 +112,26 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 		menuBar.add(menu);
 
 		// A group of JMenuItems
-		JMenuItem menuItem = new JMenuItem("Exit", KeyEvent.VK_T);
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
-		menuItem.getAccessibleContext().setAccessibleDescription("This doesn't really do anything");
-		menuItem.addActionListener(this);
-		menu.add(menuItem);
+		JMenuItem openItem = new JMenuItem("Open", KeyEvent.VK_T);
+		openItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
+		openItem.putClientProperty("id",MenuAction.OPEN);
+		openItem.addActionListener(this);
+		menu.add(openItem);
 		
+		JMenuItem saveItem = new JMenuItem("Save", KeyEvent.VK_T);
+		saveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK));
+		saveItem.putClientProperty("id",MenuAction.SAVE);
+		saveItem.addActionListener(this);
+		menu.add(saveItem);
+		
+		menu.addSeparator();
+		
+		JMenuItem exitItem = new JMenuItem("Exit", KeyEvent.VK_T);
+		exitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3, ActionEvent.ALT_MASK));
+		exitItem.putClientProperty("id",MenuAction.EXIT);
+		exitItem.addActionListener(this);
+		menu.add(exitItem);
+
 		// Attach the menu to the JFrame
 		this.setJMenuBar(menuBar);
 		
@@ -167,7 +193,7 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 		repeatCountLabel = new JLabel("Times To Repeat");
 		SpinnerNumberModel numModel = new SpinnerNumberModel(1,1,Integer.MAX_VALUE,1);
 		repeatCountSpinner = new JSpinner(numModel);
-		repeatCountSpinner.setPreferredSize(new Dimension(40,20));
+		repeatCountSpinner.setPreferredSize(new Dimension(PLAYBACK_COUNT_SPINNER_WIDTH,PLAYBACK_COUNT_SPINNER_HEIGHT));
 		repeatCountSpinner.setEnabled(false);
 		repeatCountLabel.setEnabled(false);
 		
@@ -240,7 +266,7 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 	/**
 	 * Executes code for the specified button press.
 	 * 
-	 * @param eventId	the type of button that was pressed
+	 * @param eventId	the type of button that was clicked
 	 */
 	public void processButtonPress(ButtonAction eventId) {
 		if(eventId == ButtonAction.START_RECORDING) {
@@ -282,9 +308,86 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 			playbackThread.start();
 
 		} else {
-			statusConsole.append("Command not recognized: " + eventId.toString());
+			statusConsole.append("Button press not recognized: " + eventId.toString());
 		}
 	}
+	
+	/**
+	 * Executes code for the specified JMenu selection.
+	 * 
+	 * @param eventId	the type of menu button that was clicked
+	 */
+	private void processMenuSelection(MenuAction menuId) {
+		if(menuId == MenuAction.EXIT) {
+			this.quit();
+		} else if (menuId == MenuAction.OPEN) {
+			statusConsole.append("The open selection is unimplimented");
+			
+			final JFileChooser fc = new JFileChooser();
+	        int returnVal = fc.showSaveDialog(this);
+	        if (returnVal == JFileChooser.APPROVE_OPTION) {
+	            File file = fc.getSelectedFile();
+	            statusConsole.append("Opening: " + file.getName());
+	            Storage temp = dataHolder;
+	            Scanner scanner = null;
+				try {
+					scanner = new Scanner(new BufferedReader(new FileReader(file.getAbsolutePath())));
+					scanner.useDelimiter(";");
+					dataHolder = new ListStorage(statusConsole);
+					while (scanner.hasNext()) {
+						String nextStatement = scanner.next();
+						// Strip whitespace
+						nextStatement = nextStatement.replaceAll("\\s", "");
+						if (nextStatement.length() < 1) {
+							continue;
+						}
+						dataHolder.addCommand(Command.parseCommand(nextStatement, statusConsole));
+					}
+				} catch (FileNotFoundException e) {
+					statusConsole.append("Could not find file at: "
+							+ file.getAbsolutePath());
+				} catch (Exception e) {
+					e.printStackTrace();
+					dataHolder = temp;
+				} finally {
+					scanner.close();
+				}
+	            replay.setEnabled(true);
+	            repeatCountSpinner.setEnabled(true);
+	    		repeatCountLabel.setEnabled(true);
+	        } else {
+	        	statusConsole.append("Open operation cancelled by user");
+	        }
+	        
+		} else if (menuId == MenuAction.SAVE) {
+			final JFileChooser fc = new JFileChooser();
+	        int returnVal = fc.showSaveDialog(this);
+	        if (returnVal == JFileChooser.APPROVE_OPTION) {
+	            File file = fc.getSelectedFile();
+	            PrintWriter writer = null;
+				try {
+					// Actually write to the file
+					writer = new PrintWriter(file.getAbsolutePath(), "UTF-8");
+					statusConsole.append("Saving: " + file.getName());
+					for(Command line : dataHolder.getCommandList()) {
+						writer.println(line.toString());
+					}
+				} catch (FileNotFoundException e) {
+					statusConsole.append("Application Failed to create a file at: " + file.getAbsolutePath());
+				} catch (UnsupportedEncodingException e) {
+					statusConsole.append("Save failed because UTF-8 encoding is unsupported");
+				} finally {
+					writer.close();
+				}
+	        } else {
+	        	statusConsole.append("Save operation cancelled by user");
+	        }        
+		} else {
+			statusConsole.append("Menu selection not recognized: " + menuId.toString());
+		}
+		
+	}
+
 	
 	public void updateMousePositionLabel(int x, int y) {
 		mousePositionTextDataLabel.setText(x + "," + y);
@@ -300,12 +403,13 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 	 *	Cleanup and quit the application
 	 */
 	public void quit() {
-		System.out.println("Exiting Action Listener");
+		statusConsole.append("Shuting down I/O Listeners...");
 		GlobalScreen.getInstance().removeNativeKeyListener(keyboardListener);
 		GlobalScreen.getInstance().removeNativeMouseListener(mouseListener);
 		GlobalScreen.getInstance().removeNativeMouseMotionListener(mouseListener);
 		GlobalScreen.getInstance().removeNativeMouseWheelListener(mouseWheelListener);
 		GlobalScreen.unregisterNativeHook();
+		statusConsole.append("Shutdown Complete.");
 		System.exit(0);
 	}
 	
@@ -320,7 +424,8 @@ public class Main extends JFrame implements ActionListener, WindowListener {
 			ButtonAction buttonId = (ButtonAction) ((JComponent) event.getSource()).getClientProperty("id");
 			processButtonPress(buttonId);
 		} else if(event.getSource() instanceof JMenuItem) {
-			this.quit();
+			MenuAction menuId = (MenuAction) ((JComponent) event.getSource()).getClientProperty("id");
+			processMenuSelection(menuId);
 		} else {
 			statusConsole.append("Unrecognized action: " + event.toString());
 		}

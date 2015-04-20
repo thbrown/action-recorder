@@ -1,5 +1,6 @@
 package com.github.thbrown.actionrecorder;
 
+import java.awt.event.KeyEvent;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,8 +30,12 @@ public class Hotkey {
 		System.out.println("Keys pressed: " + pressedKeys);
 		
 		// Escape key was pressed
-		if(pressedKeys.contains(27)) {
+		if(pressedKeys.contains(KeyEvent.VK_ESCAPE)) {
 			window.requestPlaybackThreadStop();	
+		} else if (pressedKeys.contains(KeyEvent.VK_ESCAPE) && pressedKeys.contains(KeyEvent.VK_A) && pressedKeys.contains(KeyEvent.VK_B)) {
+			window.processButtonPress(ButtonAction.START_RECORDING);
+		} else if (pressedKeys.contains(KeyEvent.VK_ESCAPE) && pressedKeys.contains(KeyEvent.VK_C) && pressedKeys.contains(KeyEvent.VK_D)) {
+			window.processButtonPress(ButtonAction.STOP_RECORDING);
 		}
 	}
 
